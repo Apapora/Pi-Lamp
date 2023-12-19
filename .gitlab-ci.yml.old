@@ -1,0 +1,76 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  IMAGE_NAME: "apapora/aws_lamp"
+
+# Test stage
+#before_script:
+#  - python --version  # For debugging
+
+test:
+  stage: test
+  image: python:3.9
+  script:
+    - python --version
+    - pip install -r ./docker/requirements.txt
+    # - pytest
+  artifacts:
+    when: always
+    paths:
+      - test_results.xml
+
+# Build stage
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - pwd
+    - ls
+    - echo $CI_REGISTRY_USER
+    - echo $CI_REGISTRY_PASSWORD
+    - echo $CI_REGISTRY
+    - echo $CI_REGISTRY_IMAGE
+    - echo $CI_COMMIT_SHA
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA -f ./docker/Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  #dependencies:
+   # - test
+
+# Test container stage
+test_container:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker run $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA pytest
+  #dependencies:
+  #  - build
+
+# Deploy stage
+deploy:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - echo $CI_REGISTRY_USER
+    - echo $CI_REGISTRY_PASSWORD
+    - echo $CI_REGISTRY
+    - echo $CI_REGISTRY_IMAGE
+    - echo $CI_COMMIT_SHA
+    #- docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    # docker login registry.gitlab.com
+    #- docker build -t $CI_REGISTRY_IMAGE/myimage:$CI_COMMIT_SHA .
+    # docker build -t registry.gitlab.com/apapora/aws_lamp .
+    #- docker push $CI_REGISTRY_IMAGE/myimage:$CI_COMMIT_SHA
+    # docker push registry.gitlab.com/apapora/aws_lamp
+  dependencies:
+    - build

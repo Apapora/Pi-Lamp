@@ -1,0 +1,18 @@
+[Unit]
+Description=Pi Lamp service
+After=network.target
+
+[Service]
+Environment=PYTHONPATH=$PYTHONPATH:/home/pir/myenv/lib/python3.11/site-packages
+Environment=LAMP_NAME=Lamp-TW
+Environment=LAMP_TOPIC=pi/lamp
+Environment=LAMP_COLOR_NAME=blue
+Environment=LAMP_ENDPOINT=a34vbqo515kal8-ats.iot.us-east-1.amazonaws.com
+
+ExecStart=/home/pir/myenv/bin/python3 /home/pir/Git/aws_lamp/app/lamp/pi-lamp.py --endpoint $LAMP_ENDPOINT --ca_file /home/pir/Certs/AmazonRootCA1.pem -->
+WorkingDirectory=/home/pir/Git
+User=root
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

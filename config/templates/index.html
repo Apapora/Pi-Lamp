@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Wi-Fi</title>
+</head>
+<body>
+    <h1>Wi-Fi Configuration</h1>
+    <form action="/configure" method="post">
+        <label for="ssid">SSID:</label>
+        <input type="text" id="ssid" name="ssid" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password">
+        <br>
+        <input type="submit" value="Configure">
+    </form>
+    <br>
+    <a href="/enable_ap">Enable Access Point</a>
+</body>
+</html>

@@ -1,0 +1,15 @@
+---
+- name: Update and Upgrade
+  hosts: rpi
+  become: true
+
+  tasks:
+    - name: Update package list
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes

@@ -1,0 +1,12 @@
+/docker/
+
+#Terraform
+terraform/pilamp-policy.json
+terraform/terraform.tfvars
+terraform/*.terraform
+terraform/*.tfstate.*
+terraform/*.hcl
+terraform/terraform.tfstate
+
+#Ansible
+

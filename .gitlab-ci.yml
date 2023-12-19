@@ -1,0 +1,52 @@
+variables:
+    TF_VERSION: "1.6.5"
+    TF_WORKSPACE: "gitlab"
+
+default:
+  tags:
+    - docker
+  image: apapora/pilamp:1 
+  before_script:
+    # Display versions for debugging purposes
+    - python3 -V
+    - terraform --version  
+    - aws --version
+    # Configure AWS creds
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    - aws configure set region $AWS_DEFAULT_REGION
+    - ping -c 1 $AWS_IOT_ENDPOINT
+    - >
+      if [ $? -eq 0 ]; then
+        echo "Ping successful. AWS IoT Endpoint is reachable."
+      else
+        echo "Ping failed. AWS IoT Endpoint is unreachable."
+        exit 1  # Exit with an error code to indicate failure
+      fi
+
+terraform:
+  script:
+    - pwd # For debugging purposes
+    - ls -lah # For debugging purposes
+    - ls -lah ~ # For debugging purposes
+    - mv /builds/Apapora/aws_lamp/config/AmazonRootCA1.pem ~/certs
+    - echo "Starting Work"
+    - cd /builds/Apapora/aws_lamp/terraform  
+    - terraform init
+    - terraform validate
+    - terraform workspace list
+    - terraform plan -var environment="gitlab" -var account_id=$ACCT_ID
+    - terraform apply -auto-approve -var environment="gitlab" -var account_id=$ACCT_ID
+    - terraform output device_certificate_pem > ~/certs/cert.pem
+    - terraform output device_private_key > ~/certs/private.key
+    - export IOT_ENDPOINT=$(terraform output -raw iot_endpoint)
+    - ls ~/certs # For debugging purposes
+
+
+
+
+    - echo "at CLEANUP stage"
+    - terraform destroy -auto-approve -var environment="gitlab" -var account_id=$ACCT_ID
+    - echo "Work's done"
+
+

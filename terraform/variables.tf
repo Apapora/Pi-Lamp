@@ -25,6 +25,7 @@ variable "region" {
 variable "account_id" {
   type        = string
   description = "AWS account ID"
+  default     = "?"
 }
 
 variable "thing_group_name" {
@@ -40,4 +41,5 @@ variable "sns_topic" {
 variable "environment" {
   type        = string
   description = "Used for tagging infrastructure"
+  default     = "test"
 }

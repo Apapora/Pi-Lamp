@@ -19,21 +19,22 @@ At this stage PiLamp is completely working, though I'd like to add a few new fea
 
     1. Once you're able to ssh into your RPi, clone this repo to a directory
 
-    2. Apply terraform/main.tf, changing variables as needed, to create an IoT Core device and policy. Note the Terraform outputs, the certificate and private key need to be placed in ~/certs, along with the CA file in /config.
+    2. In /terraform, edit the variables.tf file with your values, or use a .tfvars file.
 
-    3. Add the environment variables:
-        LAMP_NAME #This should be equal to Terraform's "thing_name" output
-        LAMP_COLOR #This should be the name of a [CSS Matplotlib color](https://matplotlib.org/stable/gallery/color/named_colors.html#css-colors)
-        LAMP_TOPIC #This should be equal to the Terraform "sns_topic" variable
-        LAMP_ENDPOINT #This should be set to Terraform's "iot_endpoint" output
+    3. Run 'setup.sh', which will do a few key things such as check for required packages (Python, AWSCLI, Terraform, pip packages, etc.), run terraform apply with auto-approve, creates certificates in ~/certs, and sets necessary environment variables.
 
-    4. Install the python libraries located in /docker/requirments.txt
+        Note:
+        LAMP_COLOR should be the name of a [CSS Matplotlib color](https://matplotlib.org/stable/gallery/color/named_colors.html#css-colors)
 
-    5. Start the program with a command similar to:
-        sudo -E python3 ~/Git/aws_lamp/app/lamp/pi-lamp.py --endpoint $LAMP_ENDPOINT --ca_file ~/certs/AmazonRootCA1.pem --cert ~/certs/device.pem --key ~/certs/private.pem.key --client_id $LAMP_NAME --topic $LAMP_TOPIC --count 0
+
+    4. Start the program with a command similar to:
+        sudo -E python3 ./Pi-Lamp/app/pi-lamp.py --endpoint \$LAMP_ENDPOINT --ca_file ~/certs/AmazonRootCA1.pem --cert ~/certs/cert.pem --key ~/certs/private.key --client_id \$LAMP_NAME --topic \$LAMP_TOPIC --count 0
+
+        Note:
+        Yes, this has to be run as sudo due to requirements from the rpi_ws281x package.
 
 ## Future Aditions
 
-    1. More automation to reduce the above steps
-    2. More testing (using docker)
+    1. More pipeline testing (docker)
+    2. Include dynamodb + lambda logging in Terraform
     3. Add feature for when lamps touched at same time

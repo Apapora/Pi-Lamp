@@ -12,10 +12,7 @@ if ! terraform --version &>/dev/null; then
 fi
 
 # Step 1.5: Git clone the repo into the home folder
-cd ~
-rm -rf Pi-Lamp && git clone https://github.com/Apapora/Pi-Lamp.git || {
-    echo "Issues with cloning the repo. Exiting.." && exit 1
-}
+cur_dir=$(pwd)
 
 read -p "WARNING: Please be sure to update variables.tf (or use a .tfvars file) with your values. (Hit enter to continue)"
 
@@ -56,7 +53,7 @@ else
 fi
 
 # Step 3: Terraform init and terraform apply without auto-approve, redirecting input from /dev/null
-cd ~/Pi-Lamp/terraform
+cd ./terraform
 git checkout dev
 terraform init
 wait $!
@@ -76,7 +73,7 @@ terraform output device_private_key >~/certs/private.key || {
 terraform output device_certificate_pem >~/certs/cert.pem || {
     echo "Issues with getting the certificate output. Exiting.." && exit 1
 }
-mv ~/Pi-Lamp/config/AmazonRootCA1.pem ~/certs/AmazonRootCA1.pem
+mv ./config/AmazonRootCA1.pem ~/certs/AmazonRootCA1.pem
 
 # Step 5: Prompt user for LAMP_TOPIC and LAMP_COLOR
 read -p "Enter the value for your lamp color (ie: 'red'): " LAMP_COLOR
@@ -108,4 +105,4 @@ echo "Variables added to ~/.bashrc"
 
 # Final message
 echo "Script completed successfuly. You can now start the lamp with a command similar to:"
-echo "sudo -E python3 ~/Pi-Lamp/app/pi-lamp.py --endpoint \$LAMP_ENDPOINT --ca_file ~/certs/AmazonRootCA1.pem --cert ~/certs/cert.pem --key ~/certs/private.key --client_id \$LAMP_NAME --topic \$LAMP_TOPIC --count 0"
+echo "sudo -E python3 ./Pi-Lamp/app/pi-lamp.py --endpoint \$LAMP_ENDPOINT --ca_file ~/certs/AmazonRootCA1.pem --cert ~/certs/cert.pem --key ~/certs/private.key --client_id \$LAMP_NAME --topic \$LAMP_TOPIC --count 0"

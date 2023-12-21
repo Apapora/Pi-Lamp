@@ -1,6 +1,6 @@
 ---
 - name: Update and Upgrade
-  hosts: rpi
+  hosts: lamps
   become: true
 
   tasks:

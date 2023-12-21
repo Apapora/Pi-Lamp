@@ -1,0 +1,34 @@
+---
+- name: IoT Device Setup
+  hosts: lamps
+
+  tasks:
+    - name: Check AWS CLI and Terraform
+      command: "{{ item }}"
+      loop:
+        - "aws --version"
+        - "terraform --version"
+      ignore_errors: yes
+
+    - name: Git clone the repo
+      git:
+        repo: your_git_repo_url
+        dest: "{{ ansible_user_dir }}/your_repo_folder"
+      when: not skip_git_clone | default(false)
+
+    # Add more tasks for Python requirements, package checks, etc.
+
+    - name: Terraform init and apply
+      command: "{{ item }}"
+      loop:
+        - "cd {{ ansible_user_dir }}/your_repo_folder/terraform && terraform init"
+        - "cd {{ ansible_user_dir }}/your_repo_folder/terraform && terraform apply -var='account_id={{ lookup('env', 'TF_VAR_account_id') }}' -auto-approve"
+      async: 300
+      poll: 0
+      become: yes
+
+    # Add more tasks for cert organization, user prompts, environment variable setup, etc.
+
+    - name: Final message
+      debug:
+        msg: "Script completed successfully."

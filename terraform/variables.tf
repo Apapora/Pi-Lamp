@@ -43,3 +43,9 @@ variable "environment" {
   description = "Used for tagging infrastructure"
   default     = "test"
 }
+
+variable "create_policy" {
+  type        = bool
+  description = "Bool to enable IoT policy creation"
+  default     = true
+}

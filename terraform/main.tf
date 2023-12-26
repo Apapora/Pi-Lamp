@@ -10,7 +10,7 @@ data "aws_iot_endpoint" "iot_endpoint" {
   endpoint_type = "iot:Data-ATS"
 }
 
-data "aws_iam_policy" "existing_iot_policy" {
+data "aws_iot_policy" "existing_iot_policy" {
   name = var.iot_policy_name
 }
 

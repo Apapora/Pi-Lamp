@@ -39,7 +39,7 @@ terraform:
     - terraform destroy -auto-approve -var environment="gitlab" -var account_id=$ACCT_ID
     - terraform workspace list
     - terraform plan -var environment="gitlab" -var account_id=$ACCT_ID
-    - terraform apply -auto-approve -var environment="gitlab" -var account_id=$ACCT_ID
+    - terraform apply -auto-approve -var environment="gitlab" -var account_id=$ACCT_ID -var create_policy=false
     - terraform output device_certificate_pem > ~/certs/cert.pem
     - terraform output device_private_key > ~/certs/private.key
     - export IOT_ENDPOINT=$(terraform output -raw iot_endpoint)

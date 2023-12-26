@@ -3,7 +3,7 @@ output "thing_name" {
 }
 
 output "policy_arn" {
-  value = aws_iot_policy.my_thing_policy.arn
+  value = aws_iot_policy.my_thing_policy[count.index].arn
 }
 
 output "device_certificate_pem" {

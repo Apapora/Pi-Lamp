@@ -50,6 +50,6 @@ resource "aws_iot_certificate" "my_thing_cert" {
 
 resource "aws_iot_policy_attachment" "my_thing_poly_att" {
   count  = data.aws_iam_policy.existing_iot_policy.arn ? 0 : 1
-  policy = aws_iot_policy.my_thing_policy.name
+  policy = aws_iot_policy.my_thing_policy[count.index].name
   target = aws_iot_certificate.my_thing_cert.arn
 }

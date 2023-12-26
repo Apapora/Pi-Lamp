@@ -36,6 +36,7 @@ terraform:
     - cd /builds/Apapora/pi-lamp/terraform  
     - terraform init
     - terraform validate
+    - terraform destroy -auto-approve -var environment="gitlab" -var account_id=$ACCT_ID
     - terraform workspace list
     - terraform plan -var environment="gitlab" -var account_id=$ACCT_ID
     - terraform apply -auto-approve -var environment="gitlab" -var account_id=$ACCT_ID

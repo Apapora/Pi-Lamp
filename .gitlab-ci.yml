@@ -31,9 +31,9 @@ terraform:
     - pwd # For debugging purposes
     - ls -lah # For debugging purposes
     - ls -lah ~ # For debugging purposes
-    - mv /builds/Apapora/aws_lamp/config/AmazonRootCA1.pem ~/certs
+    - mv /builds/Apapora/pi-lamp/config/AmazonRootCA1.pem ~/certs
     - echo "Starting Work"
-    - cd /builds/Apapora/aws_lamp/terraform  
+    - cd /builds/Apapora/pi-lamp/terraform  
     - terraform init
     - terraform validate
     - terraform workspace list
@@ -43,9 +43,6 @@ terraform:
     - terraform output device_private_key > ~/certs/private.key
     - export IOT_ENDPOINT=$(terraform output -raw iot_endpoint)
     - ls ~/certs # For debugging purposes
-
-
-
 
     - echo "at CLEANUP stage"
     - terraform destroy -auto-approve -var environment="gitlab" -var account_id=$ACCT_ID

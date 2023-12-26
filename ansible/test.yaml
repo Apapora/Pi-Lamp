@@ -1,0 +1,71 @@
+---
+- name: IoT Device Setup
+  hosts: lamps
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Check for HashiCorp GPG key
+      ansible.builtin.stat:
+        path: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+      register: keyring_stat
+
+    - name: Download HashiCorp GPG key if needed
+      ansible.builtin.shell:
+        cmd: "wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg"
+      when: keyring_stat.stat.exists == false
+
+    - name: Add HashiCorp repository
+      ansible.builtin.shell: "echo 'deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main' | tee /etc/apt/sources.list.d/hashicorp.list"
+      when: keyring_stat.stat.exists == false
+
+    - name: Update package list
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes
+
+    - name: Install linux packages
+      ansible.builtin.package:
+        name:
+          - terraform
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Create a virtual Python environment
+      ansible.builtin.shell: "python3 -m venv /var/venv/myvenv && /var/venv/myvenv/bin/activate"
+
+    - name: Upgrade pip in the virtual environment
+      ansible.builtin.pip:
+        name: pip
+        virtualenv: /var/venv/myvenv
+        state: latest
+
+    - name: Install Python packages
+      ansible.builtin.pip:
+        name:
+          - rpi_ws281x
+          - RPi.GPIO
+          - boto3
+          - awsiotsdk
+          - awsiot
+          - matplotlib
+        state: present
+        virtualenv: /var/venv/myvenv
+
+    ##
+    ## Variable work
+    ##
+
+    - name: Determine user's home directory
+      ansible.builtin.set_fact:
+        user_home: "{{ lookup('env', 'HOME') | default(lookup('env', 'USERPROFILE')) }}"
+
+    - name: print variables
+      debug:
+        msg: "acct is: {{ user_home }}"

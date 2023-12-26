@@ -1,33 +1,98 @@
 ---
 - name: IoT Device Setup
   hosts: lamps
+  become: true
+  gather_facts: true
+  vars_prompt:
+
+    - name: LAMP_COLOR
+      prompt: What color would you like for this lamp?
+      default: "red" 
+
+    - name: LAMP_TOPIC
+      prompt: What AWS SNS topic are you using?
+      default: "test/lamp"
 
   tasks:
-    - name: Check AWS CLI and Terraform
-      command: "{{ item }}"
-      loop:
-        - "aws --version"
-        - "terraform --version"
-      ignore_errors: yes
+    - name: Update package list
+      apt:
+        update_cache: yes
 
-    - name: Git clone the repo
-      git:
-        repo: your_git_repo_url
-        dest: "{{ ansible_user_dir }}/your_repo_folder"
-      when: not skip_git_clone | default(false)
+    - name: Upgrade all packages
+      apt:
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes
 
-    # Add more tasks for Python requirements, package checks, etc.
+    - name: Install linux packages
+      ansible.builtin.package:
+        name:
+          - awscli
+          - terraform
+          - python3
+          - python3-pip
+        state: present
 
-    - name: Terraform init and apply
-      command: "{{ item }}"
-      loop:
-        - "cd {{ ansible_user_dir }}/your_repo_folder/terraform && terraform init"
-        - "cd {{ ansible_user_dir }}/your_repo_folder/terraform && terraform apply -var='account_id={{ lookup('env', 'TF_VAR_account_id') }}' -auto-approve"
-      async: 300
-      poll: 0
-      become: yes
+    - name: Install Python packages
+      pip:
+        name:
+          - rpi_ws281x
+          - RPi.GPIO
+          - boto3
+          - awsiotsdk
+          - awsiot
+          - matplotlib
+        state: present
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
 
-    # Add more tasks for cert organization, user prompts, environment variable setup, etc.
+##
+## Variable work
+##
+    - name: Get AWS account id
+        community.aws.aws_sts_facts:
+        register: aws_sts_facts
+
+    - name: Set AWS account id as TF_VAR_account_id
+      set_fact:
+        TF_VAR_account_id: "{{ aws_sts_facts.sts_user.account }}"
+
+    - name: Git checkout
+      ansible.builtin.git:
+        repo: 'https://gitlab.com/reep/pi-lamp.git'
+        dest: /var/git/pi-lamp
+        clone: true
+        update: true
+
+    - name: Initialize Terraform
+      community.general.terraform:
+        working_dir: /var/git/pi-lamp/terraform
+        state: present
+
+    - name: Apply Teraform
+      ansible.builtin.shell: terraform apply -auto-approve -var"account_id={{ TF_VAR_account_id }}"
+        args:
+          chdir: /var/git/pi-lamp/terraform
+
+
+- name: Set env variables on host
+      lineinfile:
+        path: "~/.bashrc"  # Adjust this to the actual profile file used by your shell
+        line: "export LAMP_COLOR={{ LAMP_COLOR }}"
+        state: present
+
+    - name: Add or update LAMP_TOPIC in the shell profile file
+      lineinfile:
+        path: "~/.bashrc"  # Adjust this to the actual profile file used by your shell
+        line: "export LAMP_TOPIC={{ LAMP_TOPIC }}"
+        state: present
+
+    - name: Source the shell profile to apply changes
+      shell: source ~/.bashrc  # Adjust this to the actual profile file used by your shell
+      args:
+        executable: /bin/bash  # Adjust if needed   
+
+
 
     - name: Final message
       debug:
